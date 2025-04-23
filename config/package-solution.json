@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "rodate-client-side-solution",
+    "id": "0281f51f-fb8c-4d5b-a0a6-e1fc7d964c97",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.20.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "rodate description"
+      },
+      "longDescription": {
+        "default": "rodate description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "rodate Feature",
+        "description": "The feature that activates elements of the rodate solution.",
+        "id": "cf58c161-561f-4f83-8b3b-b4b6eb9fb121",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/rodate.sppkg"
+  }
+}

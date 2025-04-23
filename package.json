@@ -1,0 +1,63 @@
+{
+	"name": "rodate",
+	"version": "0.0.1",
+	"private": true,
+	"engines": {
+		"node": ">=18.17.1 <19.0.0"
+	},
+	"main": "lib/index.js",
+	"scripts": {
+		"build": "gulp bundle",
+		"clean": "gulp clean",
+		"test": "gulp test",
+		"bundle": "npm-run-all tailwindscss build",
+		"bundle:ship": "npm-run-all tailwindcss build:ship",
+		"webpack:serve": "fast-serve",
+		"serve": "npm-run-all -p tailwindcss:watch webpack:serve",
+		"tailwindcss": "tailwindcss -i ./assets/tailwind.css -o ./assets/dist/tailwind.css --minify --postcss ./postcss.config.js",
+		"tailwindcss:watch": "tailwindcss -i ./assets/tailwind.css -o ./assets/dist/tailwind.css --watch --minify --postcss ./postcss.config.js",
+		"publish": "gulp clean && gulp build && gulp bundle --ship",
+		"postpublish": "gulp package-solution --ship"
+	},
+	"dependencies": {
+		"@microsoft/sp-component-base": "1.20.0",
+		"@microsoft/sp-core-library": "1.20.0",
+		"@microsoft/sp-lodash-subset": "1.20.0",
+		"@microsoft/sp-office-ui-fabric-core": "1.20.0",
+		"@microsoft/sp-property-pane": "1.20.0",
+		"@microsoft/sp-webpart-base": "1.20.0",
+		"@pnp/graph": "^4.12.0",
+		"@pnp/spfx-controls-react": "3.20.0",
+		"@pnp/spfx-property-controls": "3.19.0",
+		"react": "17.0.1",
+		"react-dom": "17.0.1",
+		"tslib": "2.3.1",
+		"@fluentui/react": "^8.106.4",
+		"@fluentui/react-components": "^9.49.1",
+		"@microsoft/sp-adaptive-card-extension-base": "1.19.0",
+		"@pnp/sp": "^4.11.0"
+	},
+	"devDependencies": {
+		"autoprefixer": "^9.8.6",
+		"@fullhuman/postcss-purgecss": "^6.0.0",
+		"tailwindcss": "3.4.13",
+		"postcss-cli": "^11.0.0",
+		"postcss-import": "^16.1.0",
+		"gulp": "4.0.2",
+		"gulp-postcss": "^10.0.0",
+		"@microsoft/eslint-config-spfx": "1.20.2",
+		"@microsoft/eslint-plugin-spfx": "1.20.2",
+		"@microsoft/rush-stack-compiler-4.7": "0.1.0",
+		"@microsoft/sp-build-web": "1.20.2",
+		"@microsoft/sp-module-interfaces": "1.20.2",
+		"@rushstack/eslint-config": "4.0.1",
+		"@types/react": "17.0.45",
+		"@types/react-dom": "17.0.17",
+		"@types/webpack-env": "~1.15.2",
+		"ajv": "^6.12.5",
+		"eslint": "8.57.0",
+		"eslint-plugin-react-hooks": "4.3.0",
+		"typescript": "4.7.4",
+		"spfx-fast-serve-helpers": "~1.20.0"
+	}
+}
