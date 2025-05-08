@@ -62,7 +62,7 @@ export default class LocalVehicleService implements IVehicleService {
 
 	public async getAll(): Promise<Vehicle[]> {
 		try {
-			const queryResults: LocalVehicleResponse[] = await this._SPService.getAllItems(this.listName);
+			const queryResults: LocalVehicleResponse[] = await this._SPService.getAllItems(this.listName, false);
 
 			return queryResults.map(this.mapToVehicle);
 		} catch (e) {
@@ -76,7 +76,7 @@ export default class LocalVehicleService implements IVehicleService {
 				throw new Error(`Id not valid`);
 			}
 
-			const queryResults: LocalVehicleResponse[] = await this._SPService.getAllItems(this.listName);
+			const queryResults: LocalVehicleResponse[] = await this._SPService.getAllItems(this.listName, false);
 			const results = queryResults.map(this.mapToVehicle);
 
 			return results[0];
@@ -94,6 +94,7 @@ export default class LocalVehicleService implements IVehicleService {
 				this.listName,
 				pageSize,
 				requestedPage,
+				false,
 			);
 
 			const vehiclePage = results.map(this.mapToVehicle);
@@ -111,7 +112,7 @@ export default class LocalVehicleService implements IVehicleService {
 			}
 
 			const vehicleInsert = this.formatSharepoint(vehicle);
-			await this._SPService.insertItem(this.listName, vehicleInsert);
+			await this._SPService.insertItem(this.listName, vehicleInsert, false);
 
 			return true;
 		} catch (e) {
@@ -126,7 +127,7 @@ export default class LocalVehicleService implements IVehicleService {
 			}
 
 			const vehicleUpdate = this.formatSharepoint(vehicle);
-			await this._SPService.updateItem(this.listName, vehicleUpdate);
+			await this._SPService.updateItem(this.listName, vehicleUpdate, false);
 			return true;
 		} catch (e) {
 			throw Error(`Error updating vehicle data -> ${e}`);
@@ -139,7 +140,7 @@ export default class LocalVehicleService implements IVehicleService {
 				throw new Error(`Cannot Delete. Vehicle not valid`);
 			}
 			const vehicleDelete = this.formatSharepoint(vehicle);
-			await this._SPService.deleteItem(this.listName, vehicleDelete.Id);
+			await this._SPService.deleteItem(this.listName, vehicleDelete.Id, false);
 			return true;
 		} catch (e) {
 			throw Error(`Error deleting vehicle data -> ${e}`);

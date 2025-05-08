@@ -10,6 +10,8 @@ import '@pnp/sp/webs';
 import { ISPService } from '@services/core/spService/ISPService';
 
 export class SPService implements ISPService {
+	//Debido a que en el constructor es necesario tener webUrl, se crea un ServiceKey customizado para poder instanciar el servicio desde el WebPart.
+	// En el caso de que no se pase webUrl, se usara el contexto actual de la pagina.
 	public static readonly servicekey: ServiceKey<ISPService> = ServiceKey.createCustom(
 		'Rodate.SPService',
 		(serviceScope: ServiceScope, webUrl?: string): SPService => {

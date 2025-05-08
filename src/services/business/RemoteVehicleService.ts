@@ -3,8 +3,6 @@ import { Status } from '@common/enums/Status';
 import { ServiceKey, ServiceScope } from '@microsoft/sp-core-library';
 import Vehicle from '@models/Vehicle';
 import RemoteVehicleResponse from '@models/spServiceResponse/RemoteVehicleResponse';
-import VehicleBookingService from '@services/business/VehicleBookingService';
-import IVehicleBookingService from '@services/business/interfaces/IVehicleBookingService';
 import IVehicleService from '@services/business/interfaces/IVehicleService';
 import { ISPService } from '@services/core/spService/ISPService';
 import { SPService } from '@services/core/spService/SPService';
@@ -15,15 +13,12 @@ export default class RemoteVehicleService implements IVehicleService {
 		RemoteVehicleService,
 	);
 	private _SPService!: ISPService;
-	private _VehicleBookingService!: IVehicleBookingService;
 	private _listName!: string;
-	private _webUrl!: string;
 
 	constructor(serviceScope: ServiceScope) {
 		try {
 			serviceScope.whenFinished(() => {
-				this._SPService = serviceScope.consume(SPService.servicekey._factory(serviceScope, this._webUrl));
-				this._VehicleBookingService = serviceScope.consume(VehicleBookingService.serviceKey);
+				this._SPService = serviceScope.consume(SPService.servicekey);
 			});
 		} catch (e) {
 			throw new Error(`Error initializing RemoteVehicleService -> ${e}`);
@@ -45,38 +40,21 @@ export default class RemoteVehicleService implements IVehicleService {
 		};
 	}
 
-	private formatSharepoint(item: Vehicle): RemoteVehicleResponse {
-		return {
-			Id: item.Id,
-			Title: item.Plate,
-			Marca: item.Brand,
-			Modelo: item.Model,
-			EstaActivo: item.Active === Status.ACTIVO,
-			ID: item.Id,
-		};
-	}
-
-	// private calcularEstadoLogico(vehicle: Vehicle, VehicleBookings: VehicleBooking[]): EstadoLogico {
-	// 	const ahora = new Date();
-
-	// 	const VehicleBookingsDeEsteVehiculo = VehicleBookings.filter(
-	// 		(r) => r.VehiculoId === vehicle.Id && r.Estado === 'VehicleBooking',
-	// 	);
-
-	// 	const enUso = VehicleBookingsDeEsteVehiculo.some((r) => r.FechaInicio <= ahora && r.FechaFin >= ahora);
-
-	// 	if (enUso) return EstadoLogico.EN_USO;
-
-	// 	const futuro = VehicleBookingsDeEsteVehiculo.some((r) => r.FechaInicio > ahora);
-
-	// 	if (futuro) return EstadoLogico.VehicleBookingDO;
-
-	// 	return EstadoLogico.DISPONIBLE;
+	// Commented out as it is not used in the current implementation
+	// private formatSharepoint(item: Vehicle): RemoteVehicleResponse {
+	// 	return {
+	// 		Id: item.Id,
+	// 		Title: item.Plate,
+	// 		Marca: item.Brand,
+	// 		Modelo: item.Model,
+	// 		EstaActivo: item.Active === Status.ACTIVO,
+	// 		ID: item.Id,
+	// 	};
 	// }
 
 	public async getAll(): Promise<Vehicle[]> {
 		try {
-			const queryResults: RemoteVehicleResponse[] = await this._SPService.getAllItems(this.listName);
+			const queryResults: RemoteVehicleResponse[] = await this._SPService.getAllItems(this._listName, true);
 
 			return queryResults.map(this.mapToVehicle);
 		} catch (e) {
@@ -98,13 +76,20 @@ export default class RemoteVehicleService implements IVehicleService {
 		requestedPage: number,
 	): Promise<{ vehiclesPage: Vehicle[]; count: number }> {
 		// Para simplificar, lo hacemos completo, pero podrías optimizar esto
-		const all = await this.getAll();
-		const start = (requestedPage - 1) * pageSize;
-		const end = start + pageSize;
-		return {
-			vehiclesPage: all.slice(start, end),
-			count: all.length,
-		};
+		try {
+			const { results, totalCount } = await this._SPService.getListItemsPaged(
+				this._listName,
+				pageSize,
+				requestedPage,
+				true,
+			);
+
+			const vehiclePage = results.map(this.mapToVehicle);
+
+			return { vehiclesPage: vehiclePage, count: totalCount };
+		} catch (e) {
+			throw Error(`Error retrieving vehicles from page ${requestedPage}-> ${e}`);
+		}
 	}
 
 	public async createItem(vehicle: Vehicle): Promise<boolean> {

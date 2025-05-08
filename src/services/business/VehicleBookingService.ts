@@ -1,10 +1,10 @@
 import { ServiceKey, ServiceScope } from '@microsoft/sp-core-library';
-import { VehicleBookingResponse } from '@models/spServiceResponse/VehicleBookingResponse';
+import VehicleBookingResponse from '@models/spServiceResponse/VehicleBookingResponse';
 import Vehicle from '@models/Vehicle';
 import VehicleBooking from '@models/VehicleBooking';
 import IVehicleBookingService from '@services/business/interfaces/IVehicleBookingService';
 import IVehicleService from '@services/business/interfaces/IVehicleService';
-import VehicleService from '@services/business/LocalVehicleService';
+import RemoteVehicleService from '@services/business/RemoteVehicleService';
 import { ISPService } from '@services/core/spService/ISPService';
 import { SPService } from '@services/core/spService/SPService';
 
@@ -22,7 +22,7 @@ export default class VehicleBookingService implements IVehicleBookingService {
 		try {
 			serviceScope.whenFinished(() => {
 				this._SPService = serviceScope.consume(SPService.servicekey);
-				this._vehicleService = serviceScope.consume(VehicleService.serviceKey);
+				this._vehicleService = serviceScope.consume(RemoteVehicleService.serviceKey);
 			});
 		} catch (e) {
 			throw new Error(`Error initializing VehicleService -> ${e}`);
@@ -68,7 +68,7 @@ export default class VehicleBookingService implements IVehicleBookingService {
 
 	public async getAll(): Promise<VehicleBooking[]> {
 		try {
-			const queryResults: VehicleBookingResponse[] = await this._SPService.getAllItems(this.listName);
+			const queryResults: VehicleBookingResponse[] = await this._SPService.getAllItems(this.listName, false);
 			const vehicleList = await this._vehicleService.getAll();
 			return queryResults.map((item) => {
 				return this.mapToVehicleBooking(item, vehicleList);
@@ -84,7 +84,7 @@ export default class VehicleBookingService implements IVehicleBookingService {
 				throw new Error(`Id not valid`);
 			}
 
-			const queryResults: VehicleBookingResponse[] = await this._SPService.getAllItems(this.listName);
+			const queryResults: VehicleBookingResponse[] = await this._SPService.getAllItems(this.listName, false);
 			const vehicleList = await this._vehicleService.getAll();
 
 			const results = queryResults.map((item) => {
@@ -105,6 +105,7 @@ export default class VehicleBookingService implements IVehicleBookingService {
 				this.listName,
 				pageSize,
 				requestedPage,
+				false,
 			);
 			const vehicleList = await this._vehicleService.getAll();
 
@@ -125,7 +126,7 @@ export default class VehicleBookingService implements IVehicleBookingService {
 			}
 
 			const vehicleInsert = this.formatSharepoint(vehicleBooking);
-			await this._SPService.insertItem(this.listName, vehicleInsert);
+			await this._SPService.insertItem(this.listName, vehicleInsert, false);
 
 			return true;
 		} catch (e) {
@@ -140,7 +141,7 @@ export default class VehicleBookingService implements IVehicleBookingService {
 			}
 
 			const vehicleUpdate = this.formatSharepoint(vehicle);
-			await this._SPService.updateItem(this.listName, vehicleUpdate);
+			await this._SPService.updateItem(this.listName, vehicleUpdate, false);
 			return true;
 		} catch (e) {
 			throw Error(`Error updating vehicle booking data -> ${e}`);
@@ -153,7 +154,7 @@ export default class VehicleBookingService implements IVehicleBookingService {
 				throw new Error(`Cannot Delete. Vehicle Booking not valid`);
 			}
 			const vehicleDelete = this.formatSharepoint(vehicleBooking);
-			await this._SPService.deleteItem(this.listName, vehicleDelete.Id);
+			await this._SPService.deleteItem(this.listName, vehicleDelete.Id, false);
 			return true;
 		} catch (e) {
 			throw Error(`Error deleting vehicle booking data -> ${e}`);
