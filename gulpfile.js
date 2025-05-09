@@ -2,8 +2,11 @@
 const gulp = require('gulp');
 const gutil = require('gulp-util');
 const fs = require('fs');
-
+const build = require('@microsoft/sp-build-web');
 const path = require('path');
+
+build.addSuppression(`Warning - [sass] The local CSS class 'ms-Grid' is not camelCase and will not be type-safe.`);
+
 //TAILWIND
 const postcss = require('gulp-postcss');
 const atimport = require('postcss-import');
@@ -29,10 +32,6 @@ const tailwindcss = build.subTask('tailwindcss', function (gulp, buildOptions, d
 	done();
 });
 build.rig.addPreBuildTask(tailwindcss);
-
-const build = require('@microsoft/sp-build-web');
-
-build.addSuppression(`Warning - [sass] The local CSS class 'ms-Grid' is not camelCase and will not be type-safe.`);
 
 var getTasks = build.rig.getTasks;
 build.rig.getTasks = function () {
@@ -130,7 +129,7 @@ let bumpVersionSubTask = build.subTask('bump-version-subtask', function (gulp, b
 let bumpVersionTask = build.task('bump-version', bumpVersionSubTask);
 build.rig.addPreBuildTask(bumpVersionTask);
 
-build.initialize(require('gulp'));
+build.initialize(gulp);
 
 build.configureWebpack.mergeConfig({
 	additionalConfiguration: (generatedConfiguration) => {
