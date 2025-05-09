@@ -1,25 +1,17 @@
 // import { EstadoLogico } from '@common/enums/EstadoLogico'; // ej: DISPONIBLE, EN_USO, VehicleBookingDO
 import { Status } from '@common/enums/Status';
-import { ServiceKey, ServiceScope } from '@microsoft/sp-core-library';
 import Vehicle from '@models/Vehicle';
 import RemoteVehicleResponse from '@models/spServiceResponse/RemoteVehicleResponse';
 import IVehicleService from '@services/business/interfaces/IVehicleService';
 import { ISPService } from '@services/core/spService/ISPService';
-import { SPService } from '@services/core/spService/SPService';
 
 export default class RemoteVehicleService implements IVehicleService {
-	public static readonly serviceKey: ServiceKey<IVehicleService> = ServiceKey.create(
-		'Rodate.RemoteVehicleService',
-		RemoteVehicleService,
-	);
 	private _SPService!: ISPService;
 	private _listName!: string;
 
-	constructor(serviceScope: ServiceScope) {
+	constructor(spService: ISPService) {
 		try {
-			serviceScope.whenFinished(() => {
-				this._SPService = serviceScope.consume(SPService.servicekey);
-			});
+			this._SPService = spService;
 		} catch (e) {
 			throw new Error(`Error initializing RemoteVehicleService -> ${e}`);
 		}

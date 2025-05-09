@@ -1,121 +1,129 @@
-import * as React from 'react';
-import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
-  type IPropertyPaneConfiguration,
-  PropertyPaneTextField
+	type IPropertyPaneConfiguration,
+	PropertyPaneTextField,
+	PropertyPaneToggle,
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-import { IReadonlyTheme } from '@microsoft/sp-component-base';
+import * as React from 'react';
+import * as ReactDom from 'react-dom';
 
+import { IServicesProvider, ServicesProvider } from '@context/ServiceContext';
+import { VehicleBooking } from '@controls/booking/list/VehicleBooking';
+import ErrorComponent from '@controls/ErrorComponent';
+import IVehicleBookingService from '@services/business/interfaces/IVehicleBookingService';
+import IVehicleService from '@services/business/interfaces/IVehicleService';
+import LocalVehicleService from '@services/business/LocalVehicleService';
+import RemoteVehicleService from '@services/business/RemoteVehicleService';
+import VehicleBookingService from '@services/business/VehicleBookingService';
+import { SPService } from '@services/core/spService/SPService';
+import { createSPService } from '@services/core/spService/SPServiceFactory';
 import * as strings from 'RodateBookingListWebPartStrings';
-import RodateBookingList from './components/RodateBookingList';
-import { IRodateBookingListProps } from './components/IRodateBookingListProps';
 
 export interface IRodateBookingListWebPartProps {
-  description: string;
+	bookingListName: string;
+	vehicleListName: string;
+	useRemoteVehicleList: boolean;
+	remoteVehicleUrl: string;
 }
 
 export default class RodateBookingListWebPart extends BaseClientSideWebPart<IRodateBookingListWebPartProps> {
+	private vehicleService!: IVehicleService;
+	private vehicleBookingService!: IVehicleBookingService;
+	private spService!: SPService;
 
-  private _isDarkTheme: boolean = false;
-  private _environmentMessage: string = '';
+	private app!: React.FunctionComponentElement<IServicesProvider>;
 
-  public render(): void {
-    const element: React.ReactElement<IRodateBookingListProps> = React.createElement(
-      RodateBookingList,
-      {
-        description: this.properties.description,
-        isDarkTheme: this._isDarkTheme,
-        environmentMessage: this._environmentMessage,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
-      }
-    );
+	public render(): void {
+		try {
+			ReactDom.render(this.app, this.domElement);
+		} catch (e) {
+			console.error(e);
+		}
+	}
 
-    ReactDom.render(element, this.domElement);
-  }
+	protected async onInit(): Promise<void> {
+		await super.onInit();
 
-  protected onInit(): Promise<void> {
-    return this._getEnvironmentMessage().then(message => {
-      this._environmentMessage = message;
-    });
-  }
+		this.spService = await createSPService(this.context.serviceScope);
 
+		try {
+			const configs = this.properties;
 
+			if (!(configs.bookingListName || configs.vehicleListName || configs.remoteVehicleUrl)) {
+				throw new Error('Missing required lists names in the webpart configuration panel');
+			}
 
-  private _getEnvironmentMessage(): Promise<string> {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
-          let environmentMessage: string = '';
-          switch (context.app.host.name) {
-            case 'Office': // running in Office
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
-              break;
-            case 'Outlook': // running in Outlook
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
-              break;
-            case 'Teams': // running in Teams
-            case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
-              break;
-            default:
-              environmentMessage = strings.UnknownEnvironment;
-          }
+			if (configs.useRemoteVehicleList) {
+				this.vehicleService = new RemoteVehicleService(this.spService);
+				this.vehicleService.configure(configs.remoteVehicleUrl);
+			} else {
+				this.vehicleService = new LocalVehicleService(this.spService);
+				this.vehicleService.configure(configs.vehicleListName);
+			}
 
-          return environmentMessage;
-        });
-    }
+			this.vehicleBookingService = new VehicleBookingService(this.spService, this.vehicleService);
+			this.vehicleBookingService.configure(configs.bookingListName);
 
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
-  }
+			this.app = React.createElement(
+				ServicesProvider,
+				{
+					vehicleService: this.vehicleService,
+					bookingService: this.vehicleBookingService,
+					spWebPartContext: this.context,
+				},
+				React.createElement(VehicleBooking, {}),
+			);
+		} catch (e) {
+			console.error(e);
+			this.app = React.createElement(
+				ServicesProvider,
+				{
+					vehicleService: this.vehicleService,
+					bookingService: this.vehicleBookingService,
+					spWebPartContext: this.context,
+				},
+				React.createElement(ErrorComponent, { message: `${e}` }),
+			);
+		}
+	}
 
-  protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
-    if (!currentTheme) {
-      return;
-    }
+	protected onDispose(): void {
+		ReactDom.unmountComponentAtNode(this.domElement);
+	}
 
-    this._isDarkTheme = !!currentTheme.isInverted;
-    const {
-      semanticColors
-    } = currentTheme;
+	protected get dataVersion(): Version {
+		return Version.parse('1.0');
+	}
 
-    if (semanticColors) {
-      this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
-      this.domElement.style.setProperty('--link', semanticColors.link || null);
-      this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
-    }
-
-  }
-
-  protected onDispose(): void {
-    ReactDom.unmountComponentAtNode(this.domElement);
-  }
-
-  protected get dataVersion(): Version {
-    return Version.parse('1.0');
-  }
-
-  protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
-    return {
-      pages: [
-        {
-          header: {
-            description: strings.PropertyPaneDescription
-          },
-          groups: [
-            {
-              groupName: strings.BasicGroupName,
-              groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
-                })
-              ]
-            }
-          ]
-        }
-      ]
-    };
-  }
+	protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
+		return {
+			pages: [
+				{
+					header: {
+						description: strings.PropertyPaneDescription,
+					},
+					groups: [
+						{
+							groupName: strings.BasicGroupName,
+							groupFields: [
+								PropertyPaneTextField('bookingListName', {
+									label: 'Ingresar Nombre de Lista de Reservas',
+								}),
+								PropertyPaneTextField('vehicleListName', {
+									label: 'Ingresar Nombre de Lista de Vehiculos',
+								}),
+								PropertyPaneToggle('useRemoteVehicleList', {
+									label: 'Usar Lista de Vehiculos Remota',
+								}),
+								PropertyPaneTextField('remoteVehicleUrl', {
+									label: 'Ingresar URL de Lista de Vehiculos',
+								}),
+							],
+						},
+					],
+				},
+			],
+		};
+	}
 }

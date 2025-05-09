@@ -1,4 +1,4 @@
-import { ServiceKey, ServiceScope } from '@microsoft/sp-core-library';
+import { ServiceScope } from '@microsoft/sp-core-library';
 import { PageContext } from '@microsoft/sp-page-context';
 import { spfi, SPFI, SPFx } from '@pnp/sp/';
 import '@pnp/sp/files';
@@ -10,27 +10,21 @@ import '@pnp/sp/webs';
 import { ISPService } from '@services/core/spService/ISPService';
 
 export class SPService implements ISPService {
-	//Debido a que en el constructor es necesario tener webUrl, se crea un ServiceKey customizado para poder instanciar el servicio desde el WebPart.
-	// En el caso de que no se pase webUrl, se usara el contexto actual de la pagina.
-	public static readonly servicekey: ServiceKey<ISPService> = ServiceKey.createCustom(
-		'Rodate.SPService',
-		(serviceScope: ServiceScope, webUrl?: string): SPService => {
-			return new SPService(serviceScope, webUrl);
-		},
-	);
-
 	private _sp!: SPFI;
 	private _alternativeSp!: SPFI;
 	private _pageContext!: PageContext;
+	private _webUrl: string | undefined = undefined;
 
 	constructor(serviceScope: ServiceScope, webUrl?: string) {
+		this._webUrl = webUrl;
+
 		serviceScope.whenFinished(() => {
 			try {
 				this._pageContext = serviceScope.consume(PageContext.serviceKey);
 				this._sp = spfi().using(SPFx({ pageContext: this._pageContext }));
 
-				if (webUrl) {
-					this._alternativeSp = spfi(webUrl).using(SPFx({ pageContext: this._pageContext }));
+				if (this._webUrl) {
+					this._alternativeSp = spfi(this._webUrl).using(SPFx({ pageContext: this._pageContext }));
 				}
 			} catch (e) {
 				throw new Error(`Error initializing SPService: ${e}`);

@@ -1,25 +1,16 @@
 import { Status } from '@common/enums/Status';
-import { ServiceKey, ServiceScope } from '@microsoft/sp-core-library';
 import LocalVehicleResponse from '@models/spServiceResponse/LocalVehicleResponse';
 import Vehicle from '@models/Vehicle';
 import IVehicleService from '@services/business/interfaces/IVehicleService';
 import { ISPService } from '@services/core/spService/ISPService';
-import { SPService } from '@services/core/spService/SPService';
 
 export default class LocalVehicleService implements IVehicleService {
-	public static readonly serviceKey: ServiceKey<IVehicleService> = ServiceKey.create(
-		'Rodate.LocalVehicleService',
-		LocalVehicleService,
-	);
-
 	private _SPService!: ISPService;
 	private listName!: string;
 
-	constructor(serviceScope: ServiceScope) {
+	constructor(spService: ISPService) {
 		try {
-			serviceScope.whenFinished(() => {
-				this._SPService = serviceScope.consume(SPService.servicekey);
-			});
+			this._SPService = spService;
 		} catch (e) {
 			throw new Error(`Error initializing VehicleService -> ${e}`);
 		}

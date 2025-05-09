@@ -1,29 +1,19 @@
-import { ServiceKey, ServiceScope } from '@microsoft/sp-core-library';
 import VehicleBookingResponse from '@models/spServiceResponse/VehicleBookingResponse';
 import Vehicle from '@models/Vehicle';
 import VehicleBooking from '@models/VehicleBooking';
 import IVehicleBookingService from '@services/business/interfaces/IVehicleBookingService';
 import IVehicleService from '@services/business/interfaces/IVehicleService';
-import RemoteVehicleService from '@services/business/RemoteVehicleService';
 import { ISPService } from '@services/core/spService/ISPService';
-import { SPService } from '@services/core/spService/SPService';
 
 export default class VehicleBookingService implements IVehicleBookingService {
-	public static readonly serviceKey: ServiceKey<IVehicleBookingService> = ServiceKey.create(
-		'Rodate.VehicleService',
-		VehicleBookingService,
-	);
-
 	private _SPService!: ISPService;
 	private _vehicleService!: IVehicleService;
 	private listName!: string;
 
-	constructor(serviceScope: ServiceScope) {
+	constructor(spService: ISPService, vehicleService: IVehicleService) {
 		try {
-			serviceScope.whenFinished(() => {
-				this._SPService = serviceScope.consume(SPService.servicekey);
-				this._vehicleService = serviceScope.consume(RemoteVehicleService.serviceKey);
-			});
+			this._SPService = spService;
+			this._vehicleService = vehicleService;
 		} catch (e) {
 			throw new Error(`Error initializing VehicleService -> ${e}`);
 		}
