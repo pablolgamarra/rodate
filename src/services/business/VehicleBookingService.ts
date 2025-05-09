@@ -78,6 +78,22 @@ export default class VehicleBookingService implements IVehicleBookingService {
 		}
 	}
 
+	public async getAllFiltered(filter: string): Promise<VehicleBooking[]> {
+		try {
+			const queryResults: VehicleBookingResponse[] = await this._SPService.getItemsFiltered(
+				this.listName,
+				filter,
+				false,
+			);
+			const vehicleList = await this._vehicleService.getAll();
+			return queryResults.map((item) => {
+				return this.mapToVehicleBooking(item, vehicleList);
+			});
+		} catch (e) {
+			throw new Error(`Error retrieving all vehicles -> ${e}`);
+		}
+	}
+
 	public async getById(id: number): Promise<VehicleBooking> {
 		try {
 			if (!id) {
