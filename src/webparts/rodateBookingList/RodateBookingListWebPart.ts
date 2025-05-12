@@ -16,7 +16,7 @@ import IVehicleService from '@services/business/interfaces/IVehicleService';
 import LocalVehicleService from '@services/business/LocalVehicleService';
 import RemoteVehicleService from '@services/business/RemoteVehicleService';
 import VehicleBookingService from '@services/business/VehicleBookingService';
-import { SPService } from '@services/core/spService/SPService';
+import { ISPService } from '@services/core/spService/ISPService';
 import { createSPService } from '@services/core/spService/SPServiceFactory';
 import * as strings from 'RodateBookingListWebPartStrings';
 
@@ -30,22 +30,16 @@ export interface IRodateBookingListWebPartProps {
 export default class RodateBookingListWebPart extends BaseClientSideWebPart<IRodateBookingListWebPartProps> {
 	private vehicleService!: IVehicleService;
 	private vehicleBookingService!: IVehicleBookingService;
-	private spService!: SPService;
+	private spService!: ISPService;
 
 	private app!: React.FunctionComponentElement<IServicesProvider>;
 
-	public render(): void {
+	public async render(): Promise<void> {
 		try {
-			ReactDom.render(this.app, this.domElement);
+			this.spService = await createSPService(this.context.pageContext);
 		} catch (e) {
-			console.error(e);
+			throw Error(`Error inicializando SPService: -> ${e}`);
 		}
-	}
-
-	protected async onInit(): Promise<void> {
-		await super.onInit();
-
-		this.spService = await createSPService(this.context.serviceScope);
 
 		try {
 			const configs = this.properties;
@@ -86,6 +80,16 @@ export default class RodateBookingListWebPart extends BaseClientSideWebPart<IRod
 				React.createElement(ErrorComponent, { message: `${e}` }),
 			);
 		}
+
+		try {
+			ReactDom.render(this.app, this.domElement);
+		} catch (e) {
+			console.error(e);
+		}
+	}
+
+	protected async onInit(): Promise<void> {
+		await super.onInit();
 	}
 
 	protected onDispose(): void {
