@@ -1,3 +1,4 @@
+import { BookingStatus } from '@common/enums/BookingStatus';
 import VehicleBookingResponse from '@models/spServiceResponse/VehicleBookingResponse';
 import Vehicle from '@models/Vehicle';
 import VehicleBooking from '@models/VehicleBooking';
@@ -98,7 +99,7 @@ export default class VehicleBookingService implements IVehicleBookingService {
 			});
 			return results[0];
 		} catch (e) {
-			throw new Error(`Error retrieving all vehicles -> ${e}`);
+			throw new Error(`Error retrieving vehicle bookings for id ${id} -> ${e}`);
 		}
 	}
 
@@ -122,6 +123,41 @@ export default class VehicleBookingService implements IVehicleBookingService {
 			return { vehicleBookingsPage: vehiclePage, count: totalCount };
 		} catch (e) {
 			throw Error(`Error retrieving vehicles from page ${requestedPage}-> ${e}`);
+		}
+	}
+
+	public async getBookingsByUser(userId: number, status?: BookingStatus): Promise<VehicleBooking[]> {
+		try {
+			const vehicleList = await this._vehicleService.getAll();
+
+			if (!userId || userId <= 0) {
+				throw Error(`userId ${userId} is not a valid value`);
+			}
+
+			if (status) {
+				const filter = `SOLICITANTEId eq ${userId} and ESTADO eq '${status}'`;
+				const queryResults: VehicleBookingResponse[] = await this._SPService.getItemsFiltered(
+					this.listName,
+					filter,
+					false,
+				);
+				return queryResults.map((item) => {
+					return this.mapToVehicleBooking(item, vehicleList);
+				});
+			}
+
+			const filter = `SOLICITANTEId eq '${userId}'`;
+
+			const queryResults: VehicleBookingResponse[] = await this._SPService.getItemsFiltered(
+				this.listName,
+				filter,
+				false,
+			);
+			return queryResults.map((item) => {
+				return this.mapToVehicleBooking(item, vehicleList);
+			});
+		} catch (e) {
+			throw new Error(`Error retrieving vehicle bookings for user with id ${userId}  -> ${e}`);
 		}
 	}
 

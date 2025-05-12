@@ -1,5 +1,6 @@
+import { BookingStatus } from '@common/enums/BookingStatus';
 import { Body2, Spinner } from '@fluentui/react-components';
-import { useVehicleBookingList } from '@hooks/useVehicleBookingList';
+import { useUserBookingsList } from '@hooks/useUserBookingsList';
 import VehicleBooking from '@models/VehicleBooking';
 import React, { FC } from 'react';
 import { BookingCard } from './card/BookingCard';
@@ -8,21 +9,21 @@ export interface VehicleBookingListProps {
 	filter: string;
 }
 
-const estadoMap: Record<string, string> = {
-	approved: 'APROBADO',
-	pending: 'PENDIENTE',
-	rejected: 'RECHAZADO',
-	canceled: 'CANCELADO',
-	finished: 'FINALIZADO',
-	all: '', // o algún valor por defecto
+const estadoMap: Record<string, BookingStatus> = {
+	approved: BookingStatus.APROBADO,
+	pending: BookingStatus.PENDIENTE,
+	rejected: BookingStatus.RECHAZADO,
+	canceled: BookingStatus.CANCELADO,
+	finished: BookingStatus.FINALIZADO,
 };
 
 export const VehicleBookingList: FC<VehicleBookingListProps> = ({ filter }) => {
-	const odataFilter = estadoMap[filter] ? `ESTADO eq '${estadoMap[filter]}'` : '';
+	const odataFilter = estadoMap[filter] ? estadoMap[filter] : undefined;
 
-	const { list, loading, error } = useVehicleBookingList(odataFilter);
+	const { list, loading, error } = useUserBookingsList(odataFilter);
 
 	if (error) {
+		console.log(error);
 		return <Body2>Ha ocurrido un error al listar reservas</Body2>;
 	}
 
