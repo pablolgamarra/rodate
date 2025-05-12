@@ -1,4 +1,3 @@
-import { ServiceScope } from '@microsoft/sp-core-library';
 import { PageContext } from '@microsoft/sp-page-context';
 import { spfi, SPFI, SPFx } from '@pnp/sp/';
 import '@pnp/sp/files';
@@ -12,24 +11,20 @@ import { ISPService } from '@services/core/spService/ISPService';
 export class SPService implements ISPService {
 	private _sp!: SPFI;
 	private _alternativeSp!: SPFI;
-	private _pageContext!: PageContext;
 	private _webUrl: string | undefined = undefined;
 
-	constructor(serviceScope: ServiceScope, webUrl?: string) {
+	constructor(pageContext: PageContext, webUrl?: string) {
 		this._webUrl = webUrl;
 
-		serviceScope.whenFinished(() => {
-			try {
-				this._pageContext = serviceScope.consume(PageContext.serviceKey);
-				this._sp = spfi().using(SPFx({ pageContext: this._pageContext }));
+		try {
+			this._sp = spfi().using(SPFx({ pageContext }));
 
-				if (this._webUrl) {
-					this._alternativeSp = spfi(this._webUrl).using(SPFx({ pageContext: this._pageContext }));
-				}
-			} catch (e) {
-				throw new Error(`Error initializing SPService: ${e}`);
+			if (this._webUrl) {
+				this._alternativeSp = spfi(this._webUrl).using(SPFx({ pageContext }));
 			}
-		});
+		} catch (e) {
+			throw new Error(`Error initializing SPService: ${e}`);
+		}
 	}
 
 	public async getAllItems<T = any>(listName: string, useAlternative: boolean): Promise<T[]> {
