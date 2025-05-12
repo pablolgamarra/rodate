@@ -36,7 +36,7 @@ export default class RodateBookingListWebPart extends BaseClientSideWebPart<IRod
 
 	public async render(): Promise<void> {
 		try {
-			this.spService = await createSPService(this.context.pageContext);
+			this.spService = await createSPService(this.context.pageContext, this.properties.remoteVehicleUrl);
 		} catch (e) {
 			throw Error(`Error inicializando SPService: -> ${e}`);
 		}
@@ -50,7 +50,7 @@ export default class RodateBookingListWebPart extends BaseClientSideWebPart<IRod
 
 			if (configs.useRemoteVehicleList) {
 				this.vehicleService = new RemoteVehicleService(this.spService);
-				this.vehicleService.configure(configs.remoteVehicleUrl);
+				this.vehicleService.configure(configs.vehicleListName);
 			} else {
 				this.vehicleService = new LocalVehicleService(this.spService);
 				this.vehicleService.configure(configs.vehicleListName);
@@ -62,6 +62,7 @@ export default class RodateBookingListWebPart extends BaseClientSideWebPart<IRod
 			this.app = React.createElement(
 				ServicesProvider,
 				{
+					spService: this.spService,
 					vehicleService: this.vehicleService,
 					bookingService: this.vehicleBookingService,
 					spWebPartContext: this.context,
@@ -73,6 +74,7 @@ export default class RodateBookingListWebPart extends BaseClientSideWebPart<IRod
 			this.app = React.createElement(
 				ServicesProvider,
 				{
+					spService: this.spService,
 					vehicleService: this.vehicleService,
 					bookingService: this.vehicleBookingService,
 					spWebPartContext: this.context,
