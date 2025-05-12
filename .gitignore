@@ -12,7 +12,6 @@ package-lock.json
 # dependencies
 node_modules/
 
-
 # Build generated files
 dist
 lib
