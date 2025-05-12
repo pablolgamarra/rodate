@@ -38,7 +38,7 @@ export function useVehicleBookingList(filter: string): {
 		};
 
 		fetchVehicleBookings();
-	});
+	}, []);
 
 	return { list, loading, error };
 }
