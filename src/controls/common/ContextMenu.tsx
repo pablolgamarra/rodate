@@ -1,12 +1,4 @@
-import {
-	Button,
-	ForwardRefComponent,
-	Menu,
-	MenuItemProps,
-	MenuList,
-	MenuPopover,
-	MenuTrigger,
-} from '@fluentui/react-components';
+import { Button, Menu, MenuList, MenuPopover, MenuTrigger } from '@fluentui/react-components';
 import React from 'react';
 
 export interface ContextMenuProps {
@@ -14,15 +6,15 @@ export interface ContextMenuProps {
 	menuOptions: React.ReactElement[];
 }
 
-export const ContextMenu: React.FC<ContextMenuProps> = (triggerText, menuOptions) => {
+export const ContextMenu: React.FC<ContextMenuProps> = ({ buttonText, menuOptions }) => {
 	return (
 		<Menu positioning={{ autoSize: true }}>
 			<MenuTrigger disableButtonEnhancement>
-				<Button>{triggerText}</Button>
+				<Button>{buttonText}</Button>
 			</MenuTrigger>
 
 			<MenuPopover>
-				<MenuList>{menuOptions.map((item: ForwardRefComponent<MenuItemProps>) => item)}</MenuList>
+				<MenuList>{menuOptions.map((item, index) => React.cloneElement(item, { key: index }))}</MenuList>
 			</MenuPopover>
 		</Menu>
 	);
