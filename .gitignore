@@ -6,9 +6,6 @@ npm-debug.log*
 # Dependency directories
 node_modules
 
-# package-lock.json
-package-lock.json
-
 # dependencies
 node_modules/
 
@@ -39,3 +36,5 @@ obj
 # Styles Generated Code
 *.scss.ts
 .tours
+
+package-lock.json
