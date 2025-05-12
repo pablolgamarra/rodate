@@ -4,6 +4,8 @@ import '@pnp/sp/files';
 import '@pnp/sp/folders';
 import '@pnp/sp/items';
 import '@pnp/sp/lists';
+import { ISiteUserInfo } from '@pnp/sp/site-users/types';
+import '@pnp/sp/site-users/web';
 import '@pnp/sp/sites';
 import '@pnp/sp/webs';
 import { ISPService } from '@services/core/spService/ISPService';
@@ -25,6 +27,13 @@ export class SPService implements ISPService {
 		} catch (e) {
 			throw new Error(`Error initializing SPService: ${e}`);
 		}
+	}
+
+	public getSPUser(): {
+		spSiteUser: Promise<ISiteUserInfo>;
+		alternativeSiteUser: Promise<ISiteUserInfo | undefined>;
+	} {
+		return { spSiteUser: this._sp.web.currentUser(), alternativeSiteUser: this._alternativeSp.web.currentUser() };
 	}
 
 	public async getAllItems<T = any>(listName: string, useAlternative: boolean): Promise<T[]> {
@@ -67,7 +76,7 @@ export class SPService implements ISPService {
 				if (!this._alternativeSp) {
 					throw new Error(`Alternative SP context is not available`);
 				}
-				return await this._alternativeSp.web.lists.getByTitle(listName).items();
+				return await this._alternativeSp.web.lists.getByTitle(listName).items.getById(id)();
 			}
 			return await this._sp.web.lists.getByTitle(listName).items.getById(id)();
 		} catch (e) {
