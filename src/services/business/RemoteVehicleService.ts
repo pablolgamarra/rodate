@@ -17,7 +17,7 @@ export default class RemoteVehicleService implements IVehicleService {
 		}
 	}
 
-	public configure(vehicleListName: string, VehicleBookingListName?: string): void {
+	public configure(vehicleListName: string): void {
 		if (!vehicleListName) throw new Error(`Vehicle List Name is not valid`);
 		this._listName = vehicleListName;
 	}
@@ -31,18 +31,6 @@ export default class RemoteVehicleService implements IVehicleService {
 			Active: item.EstaActivo ? Status.ACTIVO : Status.INACTIVO,
 		};
 	}
-
-	// Commented out as it is not used in the current implementation
-	// private formatSharepoint(item: Vehicle): RemoteVehicleResponse {
-	// 	return {
-	// 		Id: item.Id,
-	// 		Title: item.Plate,
-	// 		Marca: item.Brand,
-	// 		Modelo: item.Model,
-	// 		EstaActivo: item.Active === Status.ACTIVO,
-	// 		ID: item.Id,
-	// 	};
-	// }
 
 	public async getAll(): Promise<Vehicle[]> {
 		try {
