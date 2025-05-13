@@ -1,3 +1,4 @@
+import VehicleBookingForm from '@controls/booking/createAndEdit/VehicleBookingForm';
 import { TopNavBar } from '@controls/booking/list/TopNavBar';
 import { SelectTabData, SelectTabEvent } from '@fluentui/react-components';
 import React, { FC, useState } from 'react';
@@ -18,6 +19,7 @@ export const VehicleBooking: FC<VehicleBookingProps> = () => {
 				<h1 className='tw-text-2xl tw-font-bold'>Mis Reservas</h1>
 			</div>
 			<div className='tw-mt-4'>
+				<VehicleBookingForm />
 				<TopNavBar
 					selectedValue={activeTab}
 					onTabSelect={onTabSelect}

@@ -8,7 +8,7 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 
-import { IServicesProvider, ServicesProvider } from '@context/ServiceContext';
+import { IServicesProvider, ServicesProvider } from '@context/ServicesContext';
 import { VehicleBooking } from '@controls/booking/list/VehicleBooking';
 import ErrorComponent from '@controls/ErrorComponent';
 import IVehicleBookingService from '@services/business/interfaces/IVehicleBookingService';

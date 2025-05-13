@@ -1,4 +1,4 @@
-import { IServicesProvider, ServicesContext } from '@context/ServiceContext';
+import { IServicesProvider, ServicesContext } from '@context/ServicesContext';
 import { useContext } from 'react';
 
 export default function useServiceContext(): IServicesProvider {

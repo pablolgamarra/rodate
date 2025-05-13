@@ -1,24 +1,21 @@
 {
-	"@microsoft/generator-sharepoint": {
-		"whichFolder": "subdir",
-		"solutionName": "rodate",
-		"componentType": "webpart",
-		"template": "react",
-		"componentName": "rodate-booking-list",
-		"plusBeta": false,
-		"isCreatingSolution": true,
-		"nodeVersion": "18.18.1",
-		"sdksVersions": {
-			"@microsoft/microsoft-graph-client": "3.0.2",
-			"@microsoft/teams-js": "2.24.0"
-		},
-		"version": "1.21.1",
-		"libraryName": "rodate",
-		"libraryId": "0281f51f-fb8c-4d5b-a0a6-e1fc7d964c97",
-		"environment": "spo",
-		"packageManager": "npm",
-		"solutionShortDescription": "rodate description",
-		"skipFeatureDeployment": true,
-		"isDomainIsolated": false
-	}
+  "@microsoft/generator-sharepoint": {
+    "whichFolder": "subdir",
+    "solutionName": "rodate",
+    "componentType": "webpart",
+    "template": "react",
+    "componentName": "rodate-create-edit-booking",
+    "plusBeta": false,
+    "isCreatingSolution": false,
+    "nodeVersion": "22.14.0",
+    "sdksVersions": {},
+    "version": "1.21.1",
+    "libraryName": "rodate",
+    "libraryId": "0281f51f-fb8c-4d5b-a0a6-e1fc7d964c97",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionShortDescription": "rodate description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false
+  }
 }
